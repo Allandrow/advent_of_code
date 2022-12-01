@@ -3,7 +3,7 @@ import { input } from './input.js';
 
 const data = input || sample;
 
-const results = [] as number[];
+export const results = [] as number[];
 let total = 0;
 
 data.split('\n').forEach((line) => {
@@ -19,6 +19,6 @@ results.push(total);
 
 const result = Math.max(...results);
 
-console.log(result);
+// console.log(result);
 
 // 69281
