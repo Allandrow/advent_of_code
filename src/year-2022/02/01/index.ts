@@ -22,7 +22,7 @@ const result = data
    .split('\n')
    .map((l) => l.split(' '))
    .reduce((total, game) => {
-      total += parseInt(values[game[1]]);
+      total += values[game[1]];
 
       if (values[game[0]] === values[game[1]]) {
          return total + 3;
