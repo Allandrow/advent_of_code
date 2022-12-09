@@ -131,5 +131,13 @@ const total = system.directories
    .filter((n) => n <= 100_000)
    .reduce((sum, num) => sum + num, 0);
 
-console.log(total);
+const rootSize = system.root.size
+const MAX_SIZE = 70_000_000
+const MIN_SIZE = 30_000_000
 
+const UNUSED_SPACE = MAX_SIZE - rootSize
+const NEEDED_SPACE = MIN_SIZE - UNUSED_SPACE
+
+const toDelete = system.directories.map(dir => dir.size).sort((a,b) => a - b).find(n => n >= NEEDED_SPACE)
+
+console.log(toDelete)
