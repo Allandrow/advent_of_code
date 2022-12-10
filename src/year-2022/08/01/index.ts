@@ -8,12 +8,22 @@ interface HiddenBy {
    right: number;
 }
 
+interface Previous {
+   top: number[];
+   left: number[];
+   bottom: number[];
+   right: number[];
+}
+
 interface Tree {
    value: number;
    isVisible: boolean;
    isEdge: boolean;
    hiddenBy: Partial<HiddenBy>;
+   previous: Previous;
 }
+
+type Direction = 'top' | 'bottom' | 'left' | 'right';
 
 // UTILS
 
@@ -25,7 +35,7 @@ const isEdge = (x: number, y: number) => {
    return isXEdge || isYEdge;
 };
 
-const getNeighbour = (x: number, y: number, direction: string) => {
+const getNeighbour = (x: number, y: number, direction: Direction) => {
    switch (direction) {
       case 'top':
          return map.get(`${y - 1}-${x}`);
@@ -40,25 +50,24 @@ const getNeighbour = (x: number, y: number, direction: string) => {
    }
 };
 
-
-const getHiddenBy = (tree: Tree, x: number, y: number, direction: string) => {
+const getHiddenBy = (tree: Tree, x: number, y: number, direction: Direction) => {
    const { hiddenBy } = tree;
-   const neighbour = getNeighbour(x,y,direction)
-   const hiddenByDirection = neighbour.hiddenBy[direction]
-   const tallest = hiddenByDirection && neighbour.value < hiddenByDirection ? hiddenByDirection : neighbour.value
-   
-   if(tallest >= tree.value) {
-     return { ...hiddenBy, [direction]: tallest};
+   const neighbour = getNeighbour(x, y, direction);
+   const hiddenByDirection = neighbour.hiddenBy[direction];
+   const tallest = hiddenByDirection && neighbour.value < hiddenByDirection ? hiddenByDirection : neighbour.value;
+
+   if (tallest >= tree.value) {
+      return { ...hiddenBy, [direction]: tallest };
    }
 
-   return hiddenBy
+   return hiddenBy;
 };
 
 const setVisibility = (tree: Tree) => {
-  const isVisible = Object.values(tree.hiddenBy).length < 4
+   const isVisible = Object.values(tree.hiddenBy).length < 4;
 
-  return {...tree, isVisible}
-}
+   return { ...tree, isVisible };
+};
 
 const setMap = (array: number[]) => {
    const map = new Map<string, Tree>();
@@ -69,7 +78,13 @@ const setMap = (array: number[]) => {
          value: n,
          isVisible: true,
          isEdge: isEdge(x, y),
-         hiddenBy: {}
+         hiddenBy: {},
+         previous: {
+            top: [],
+            left: [],
+            bottom: [],
+            right: []
+         }
       };
       map.set(key, item);
    });
@@ -96,6 +111,23 @@ flattenedData.forEach((_, i) => {
    const [x, y] = getCoords(i);
    const key = `${y}-${x}`;
    let current = map.get(key);
+
+   if (x > 0) {
+      const {
+         value,
+         previous: { left }
+      } = getNeighbour(x, y, 'left');
+      current.previous.left = [value, ...left];
+   }
+
+   if (y > 0) {
+      const {
+         value,
+         previous: { top }
+      } = getNeighbour(x, y, 'top');
+      current.previous.top = [value, ...top];
+   }
+
    if (!current.isEdge) {
       current = { ...current, isVisible: false, hiddenBy: getHiddenBy(current, x, y, 'top') };
       current = { ...current, isVisible: false, hiddenBy: getHiddenBy(current, x, y, 'left') };
@@ -104,10 +136,27 @@ flattenedData.forEach((_, i) => {
 });
 
 // loop from bottom right
-for (let i = flattenedData.length - 1; i > 0; i--) {
+for (let i = flattenedData.length - 1; i >= 0; i--) {
    const [x, y] = getCoords(i);
    const key = `${y}-${x}`;
    let current = map.get(key);
+
+   if (x < xLength - 1) {
+      const {
+         value,
+         previous: { right }
+      } = getNeighbour(x, y, 'right');
+      current.previous.right = [value, ...right];
+   }
+
+   if (y < yLength - 1) {
+      const {
+         value,
+         previous: { bottom }
+      } = getNeighbour(x, y, 'bottom');
+      current.previous.bottom = [value, ...bottom];
+   }
+
    if (!current.isEdge) {
       current = { ...current, isVisible: false, hiddenBy: getHiddenBy(current, x, y, 'bottom') };
       current = { ...current, isVisible: false, hiddenBy: getHiddenBy(current, x, y, 'right') };
@@ -116,6 +165,27 @@ for (let i = flattenedData.length - 1; i > 0; i--) {
    }
 }
 
-const visibles = [...map].filter(([_, { isVisible }]) => isVisible);
+// const visibles = [...map].filter(([_, { isVisible }]) => isVisible);
 
-console.log(visibles.length, 'visible');
+const result = [...map].map(([_, x]) => {
+   const { previous, value } = x;
+
+   const isAboveVal = (n: number) => n >= value;
+   const getIndex = (arr: number[]) => {
+      if (arr.length === 0) {
+         return 0;
+      }
+
+      const index = arr.findIndex(isAboveVal);
+      return index === -1 ? arr.length : index + 1;
+   };
+
+   const top = getIndex(previous.top);
+   const left = getIndex(previous.left);
+   const right = getIndex(previous.right);
+   const bottom = getIndex(previous.bottom);
+
+   return [top, left, right, bottom].reduce((total, val) => total * val);
+});
+
+console.log(Math.max(...result));
