@@ -1,7 +1,8 @@
 import { input } from './input.js';
 import { sample } from './sample.js';
 
-const data = input || sample;
+// const data = input || sample;
+const data = sample
 
 const instructions = data.split('\n').map((line) => {
    const [direction, times] = line.split(' ');
@@ -66,6 +67,4 @@ instructions.forEach(({direction, times}) => {
   } while(times > 0)
 })
 
-console.log(wentTo.size)
-
-
+// console.log(wentTo.size)
