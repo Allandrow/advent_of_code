@@ -1,42 +1,42 @@
-import { input } from "./input.js";
-import { sample } from "./sample.js";
+import { input } from './input.js';
+import { sample } from './sample.js';
 
-const data = input || sample
+const data = input || sample;
 
-const instructions = data.split('\n')
+const instructions = data.split('\n');
 
-const cycles = [20,60,100,140,180,220]
+const cycles = [20, 60, 100, 140, 180, 220];
 
 class Circuit {
-  value: number
-  cycle: number
-  sum: number
+   value: number;
+   cycle: number;
+   sum: number;
 
-  constructor(){
-    this.value = 1
-    this.cycle = 0
-    this.sum = 0
-  }
+   constructor() {
+      this.value = 1;
+      this.cycle = 0;
+      this.sum = 0;
+   }
 
-  addCycle(){
-    this.cycle+=1
-    if(cycles.includes(this.cycle)){
-      this.updateSum()
-    }
-  }
+   addCycle() {
+      this.cycle += 1;
+      if (cycles.includes(this.cycle)) {
+         this.updateSum();
+      }
+   }
 
-  addValue(value: number){
-    this.value += value
-  }
+   addValue(value: number) {
+      this.value += value;
+   }
 
-  updateSum(){
-    const newValue = this.cycle * this.value
-    console.log('new value', newValue, 'cycle', this.cycle, 'value', this.value)
-    this.sum += newValue
-  }
+   updateSum() {
+      const newValue = this.cycle * this.value;
+      console.log('new value', newValue, 'cycle', this.cycle, 'value', this.value);
+      this.sum += newValue;
+   }
 }
 
-const circuit = new Circuit()
+const circuit = new Circuit();
 
 instructions.forEach(line => {
   circuit.addCycle()
