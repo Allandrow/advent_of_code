@@ -4,6 +4,7 @@ import { sample } from './sample.js';
 const data = input || sample;
 
 const getId = (l: string) => parseInt(l.match(/\d+/)[0], 10);
+const getFactor = (l: string) => parseInt(l.match(/\d+/)[0], 10);
 const getItems = (l: string) =>
   l
     .split(' ')
@@ -56,13 +57,13 @@ class Monkey {
   }
 
   inspect(item: number) {
-    const newItemValue = Math.floor(this.operation(item) / 3);
+    const newItemValue = this.operation(item);
     this.inspections++;
 
     if (this.test(newItemValue)) {
-      monkeys.throwTo(this.targets[0], newItemValue);
+      monkeys.throwTo(this.targets[0], newItemValue % monkeys.commonFactor);
     } else {
-      monkeys.throwTo(this.targets[1], newItemValue);
+      monkeys.throwTo(this.targets[1], newItemValue % monkeys.commonFactor);
     }
   }
 
@@ -84,9 +85,11 @@ class Monkey {
 
 class Monkeys {
   monkeys: Monkey[];
+  commonFactor: number;
 
   constructor() {
     this.monkeys = [];
+    this.commonFactor = 1;
   }
 
   throwTo(id: number, item: number) {
@@ -102,6 +105,7 @@ class Monkeys {
     const test = getTest(testLine);
     const targets = [getTarget(trueLine), getTarget(falseLine)] as Targets;
 
+    this.commonFactor *= getFactor(testLine);
     this.monkeys.push(Monkey.setup({ id, items, operation, test, targets }));
   }
 
@@ -110,7 +114,7 @@ class Monkeys {
   }
 
   getMostActives() {
-    const [first, second, ...rest] = this.monkeys.map((monkey) => monkey.inspections).sort((a, b) => b - a);
+    const [first, second] = this.monkeys.map((monkey) => monkey.inspections).sort((a, b) => b - a);
     return first * second;
   }
 }
@@ -121,7 +125,7 @@ const instructions = data.split('\n\n');
 
 instructions.forEach((instruction) => monkeys.addMonkey(instruction));
 
-for (let i = 0; i < 20; i++) {
+for (let i = 0; i < 10000; i++) {
   monkeys.playRound();
 }
 
