@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "try": "npm run build && node dist/11/index.js"
+    "try": "npm run build && node dist/12/index.js"
   },
   "repository": {
     "type": "git",
